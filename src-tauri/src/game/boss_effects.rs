@@ -42,7 +42,7 @@ pub fn all_bosses() -> Vec<Boss> {
             id: "the_thief".into(),
             name_zh: "无影之贼".into(),
             name_en: "The Shadow Thief".into(),
-            gimmick: BossGimmick::NoDiscard,
+            gimmick: BossGimmick::ReducedSkipBonus(3),
             score_multiplier: 1.0,
         },
         Boss {
@@ -90,7 +90,7 @@ pub fn apply_boss_effects(
             tax = *t;
         }
         BossGimmick::BlindSuit(_) => {} // Handled in frontend: hide suit display
-        BossGimmick::NoDiscard => {}     // Handled in skip_play: disabled
+        BossGimmick::ReducedSkipBonus(_) => {} // Handled in skip_play: fewer tiles
         BossGimmick::ForcedPattern(_) => {} // Handled in scoring: bonus fan if matched
     }
 

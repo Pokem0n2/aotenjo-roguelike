@@ -52,9 +52,9 @@ export function Board() {
     }
   }, []);
 
-  // Check if skip is blocked by boss
-  const skipBlocked = !bossDisabled && boss !== null &&
-    (boss.gimmick_description?.includes("禁止跳过") ?? false);
+  // Check if skip gives fewer tiles (display info)
+  const skipReduced = !bossDisabled && boss !== null &&
+    boss.gimmick_description?.includes("跳过只摸") === true;
 
   // Auto-detect round over → switch to RoundResult phase
   useEffect(() => {
@@ -188,9 +188,9 @@ export function Board() {
         <button
           className="btn btn-secondary"
           onClick={handleSkip}
-          disabled={isLoading || roundOver || skipBlocked}
+          disabled={isLoading || roundOver}
         >
-          {skipBlocked ? "Boss禁止跳过" : "跳过(+8牌)"}
+          {skipReduced ? "跳过(+3牌)" : "跳过(+8牌)"}
         </button>
         <span className="selected-count">
           已选 {selectedTileIds.length} 张

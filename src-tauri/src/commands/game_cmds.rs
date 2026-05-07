@@ -114,7 +114,7 @@ impl From<&crate::models::boss::Boss> for BossView {
                 format!("隐藏所有{}牌面", suit_name)
             }
             crate::models::boss::BossGimmick::ReducedPlays(n) => format!("出牌次数减少为{}", n),
-            crate::models::boss::BossGimmick::NoDiscard => "禁止跳过出牌".to_string(),
+            crate::models::boss::BossGimmick::ReducedSkipBonus(n) => format!("跳过只摸{}张牌", n),
             crate::models::boss::BossGimmick::TaxPerPlay(t) => format!("每次出牌缴纳{}金币", t),
             crate::models::boss::BossGimmick::ScoreThresholdScale(s) => format!("目标分数×{:.1}", s),
             crate::models::boss::BossGimmick::ForcedPattern(p) => format!("完成特定牌型可获得奖励番"),

@@ -15,7 +15,7 @@ pub struct Boss {
 pub enum BossGimmick {
     BlindSuit(TileSuit),
     ReducedPlays(u8),
-    NoDiscard,
+    ReducedSkipBonus(usize),
     TaxPerPlay(u32),
     ScoreThresholdScale(f64),
     ForcedPattern(String),

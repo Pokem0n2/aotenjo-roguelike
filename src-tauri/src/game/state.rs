@@ -273,20 +273,23 @@ impl GameState {
     }
 
     pub fn skip_play(&mut self) {
-        // Check NoDiscard boss gimmick
-        if !self.boss_disabled {
-            if let Some(ref boss) = self.boss {
-                if matches!(boss.gimmick, crate::models::boss::BossGimmick::NoDiscard) {
-                    // Cannot skip under NoDiscard boss — just increment play
-                    self.current_play += 1;
-                    return;
-                }
-            }
-        }
-
         self.current_play += 1;
 
-        let draw = std::cmp::min(8, self.wall.remaining());
+        let skip_draw = if !self.boss_disabled {
+            if let Some(ref boss) = self.boss {
+                if let crate::models::boss::BossGimmick::ReducedSkipBonus(n) = boss.gimmick {
+                    n
+                } else {
+                    8
+                }
+            } else {
+                8
+            }
+        } else {
+            8
+        };
+
+        let draw = std::cmp::min(skip_draw, self.wall.remaining());
         if draw > 0 {
             self.draw_more_tiles(draw);
         }
@@ -488,7 +491,6 @@ impl GameState {
             }
             crate::models::gadget::GadgetEffect::DisableBoss => {
                 self.boss_disabled = true;
-                // Restore default max_plays and remove tax
                 self.max_plays = 20;
                 self.tax_per_play = 0;
                 Ok("已移除Boss效果!".to_string())
