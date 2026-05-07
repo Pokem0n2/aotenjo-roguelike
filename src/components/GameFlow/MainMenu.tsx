@@ -4,6 +4,7 @@ import { startRun, loadGame, listSaves, deleteSave } from "../../api/game";
 import type { SaveMeta } from "../../api/game";
 import { SettingsMenu } from "../common/SettingsMenu";
 import { PatternCodex } from "../common/PatternCodex";
+import { TutorialPopup } from "../common/TutorialPopup";
 
 export function MainMenu() {
   const phase = useGameStore((s) => s.phase);
@@ -15,6 +16,7 @@ export function MainMenu() {
   const [showSaves, setShowSaves] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCodex, setShowCodex] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const [saves, setSaves] = useState<SaveMeta[]>([]);
 
   useEffect(() => {
@@ -81,6 +83,9 @@ export function MainMenu() {
         </div>
 
         <div className="main-menu-footer">
+          <button className="btn btn-sm btn-secondary" onClick={() => setShowTutorial(true)}>
+            游戏教程
+          </button>
           <button className="btn btn-sm btn-secondary" onClick={() => setShowCodex(true)}>
             牌型图鉴
           </button>
@@ -125,6 +130,7 @@ export function MainMenu() {
 
         {showSettings && <SettingsMenu onClose={() => setShowSettings(false)} />}
         {showCodex && <PatternCodex onClose={() => setShowCodex(false)} />}
+        {showTutorial && <TutorialPopup onClose={() => setShowTutorial(false)} />}
       </div>
     );
   }

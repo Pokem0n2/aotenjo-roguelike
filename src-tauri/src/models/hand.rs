@@ -66,7 +66,7 @@ impl Play {
 ///   = 5 tiles (chi/pon + pair) or 6 tiles (kan + pair)
 pub fn validate_play_structure(tiles: &[Tile]) -> Result<Play, String> {
     if tiles.len() < 5 || tiles.len() > 14 {
-        return Err(format!("Invalid tile count: {} (expected 5-14)", tiles.len()));
+        return Err(format!("选牌数量无效: {}张 (需要5-14张)", tiles.len()));
     }
 
     // For the basic play, expect 5 or 6 tiles (one meld + one pair)
@@ -130,7 +130,7 @@ fn validate_single_meld_play(tiles: &[Tile]) -> Result<Play, String> {
         // Also try 3-tile meld + pair, with 1 extra (shouldn't be valid for 6 tiles)
     }
 
-    Err("Selected tiles do not form a valid meld + pair combination".to_string())
+    Err("选中的牌无法组成合法的面子+对子组合".to_string())
 }
 
 fn validate_full_hand(tiles: &[Tile]) -> Result<Play, String> {
@@ -166,7 +166,7 @@ fn validate_full_hand(tiles: &[Tile]) -> Result<Play, String> {
         }
     }
 
-    Err("Cannot form a valid mahjong hand".to_string())
+    Err("无法组成合法的和牌牌型".to_string())
 }
 
 fn try_standard_decomposition(tiles: &[Tile]) -> Option<Play> {

@@ -36,16 +36,16 @@
   gap: 2px;
 }
 
-.tile-top {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
+.tile-image {
+  width: 40px;
+  height: 56px;
+  object-fit: contain;
+  pointer-events: none;
 }
 
-.tile-bottom {
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
+.tile-inline-image {
+  border-radius: 3px;
+  pointer-events: none;
 }
 
 /* Board */
@@ -988,6 +988,25 @@
   font-weight: 600;
 }
 
+.codex-example {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.codex-tile-img {
+  width: 24px;
+  height: 33px;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+.codex-ellipsis {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 /* Main menu footer */
 .main-menu-footer {
   display: flex;
@@ -1025,4 +1044,45 @@
   color: var(--accent-gold);
   animation: scoreFloat 1.2s ease-out forwards;
   pointer-events: none;
+}
+
+/* Tutorial */
+.tutorial-menu {
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 24px 28px;
+  max-width: 550px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tutorial-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tutorial-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.tutorial-section p {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.tutorial-section ul {
+  margin: 4px 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #bbb;
+  line-height: 1.8;
 }

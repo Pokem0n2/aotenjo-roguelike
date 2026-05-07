@@ -6,51 +6,19 @@ interface TileProps {
   onClick?: () => void;
 }
 
-// 每种花色统一颜色：万=红、索=绿、筒=黑
-const SUIT_CONFIG: Record<string, { char: string; color: string }> = {
-  Manzu:  { char: "万", color: "#c62828" }, // 红色
-  Pinzu:  { char: "筒", color: "#212121" }, // 黑色
-  Souzu:  { char: "索", color: "#2e7d32" }, // 绿色
-  Wind:   { char: "",   color: "#37474f" },
-  Dragon: { char: "",   color: "#37474f" },
-};
-
-const WIND_CHARS = ["东", "南", "西", "北"];
-const DRAGON_CHARS = ["白", "發", "中"];
-const DRAGON_COLORS = ["#757575", "#2e7d32", "#c62828"];
-const NUM_CHARS = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
-
-function getTileDisplay(tile: TileView): { top: string; bottom: string; color: string } {
+function getTileImagePath(tile: TileView): string {
   switch (tile.suit) {
-    case "Manzu":
-    case "Pinzu":
-    case "Souzu": {
-      const cfg = SUIT_CONFIG[tile.suit];
-      return {
-        top: NUM_CHARS[tile.rank - 1],
-        bottom: cfg.char,
-        color: cfg.color,
-      };
-    }
-    case "Wind":
-      return {
-        top: WIND_CHARS[tile.rank - 1],
-        bottom: "",
-        color: SUIT_CONFIG.Wind.color,
-      };
-    case "Dragon":
-      return {
-        top: DRAGON_CHARS[tile.rank - 1],
-        bottom: "",
-        color: DRAGON_COLORS[tile.rank - 1],
-      };
-    default:
-      return { top: "?", bottom: "", color: "#333" };
+    case "Manzu":  return `/tiles/${tile.rank}m.png`;
+    case "Pinzu":  return `/tiles/${tile.rank}p.png`;
+    case "Souzu":  return `/tiles/${tile.rank}s.png`;
+    case "Wind":   return `/tiles/${tile.rank}z.png`;  // 1z-4z = 东南西北
+    case "Dragon": return `/tiles/${tile.rank + 4}z.png`; // 5z=白, 6z=發, 7z=中
+    default:       return "";
   }
 }
 
 export function Tile({ tile, selected, onClick }: TileProps) {
-  const display = getTileDisplay(tile);
+  const imgPath = getTileImagePath(tile);
 
   return (
     <div
@@ -58,16 +26,36 @@ export function Tile({ tile, selected, onClick }: TileProps) {
       onClick={onClick}
       title={tile.display_zh}
     >
-      <div className="tile-inner">
-        <span className="tile-top" style={{ color: display.color }}>
-          {display.top}
-        </span>
-        {display.bottom && (
-          <span className="tile-bottom" style={{ color: display.color }}>
-            {display.bottom}
-          </span>
-        )}
-      </div>
+      <img
+        className="tile-image"
+        src={imgPath}
+        alt={tile.display_zh}
+        draggable={false}
+      />
     </div>
   );
+}
+
+export function TileImage({ tile, size = 32 }: { tile: TileView; size?: number }) {
+  const imgPath = getTileImagePath(tile);
+  return (
+    <img
+      className="tile-inline-image"
+      src={imgPath}
+      alt={tile.display_zh}
+      style={{ width: size, height: size * 1.38 }}
+      draggable={false}
+    />
+  );
+}
+
+export function getTileImagePathFromSuitRank(suit: string, rank: number): string {
+  switch (suit) {
+    case "Manzu":  return `/tiles/${rank}m.png`;
+    case "Pinzu":  return `/tiles/${rank}p.png`;
+    case "Souzu":  return `/tiles/${rank}s.png`;
+    case "Wind":   return `/tiles/${rank}z.png`;
+    case "Dragon": return `/tiles/${rank + 4}z.png`;
+    default:       return "";
+  }
 }
