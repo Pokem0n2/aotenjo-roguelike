@@ -7,6 +7,7 @@ import { ArtifactBar } from "../Artifacts/ArtifactBar";
 import { RoundResult } from "../GameFlow/RoundResult";
 import { GameOver } from "../GameFlow/GameOver";
 import { VictoryScreen } from "../GameFlow/VictoryScreen";
+import { ShopScreen } from "../Shop/ShopScreen";
 
 export function Board() {
   const {
@@ -22,6 +23,9 @@ export function Board() {
     roundTarget,
     currency,
     artifacts,
+    gadgets,
+    boss,
+    bossDisabled,
     isLoading,
     lastPlayResult,
     error,
@@ -35,6 +39,10 @@ export function Board() {
 
   const windNames: Record<string, string> = { East: "东", South: "南", West: "西", North: "北" };
   const roundOver = currentPlay >= maxPlays || roundScore >= roundTarget;
+
+  // Check if skip is blocked by boss
+  const skipBlocked = !bossDisabled && boss !== null &&
+    (boss.gimmick_description?.includes("禁止跳过") ?? false);
 
   // Auto-detect round over → switch to RoundResult phase
   useEffect(() => {
@@ -100,6 +108,7 @@ export function Board() {
   if (phase === "GameOver") return <GameOver />;
   if (phase === "Victory") return <VictoryScreen />;
   if (phase === "RoundResult") return <RoundResult />;
+  if (phase === "Shop") return <ShopScreen />;
 
   return (
     <div className="board">
@@ -114,6 +123,15 @@ export function Board() {
         <span className="wall-info">牌墙剩余: {wallRemaining}</span>
       </div>
 
+      {/* Boss display */}
+      {boss && !bossDisabled && (
+        <div className="boss-banner">
+          <span className="boss-icon">👹</span>
+          <span className="boss-name">{boss.name_zh}</span>
+          <span className="boss-gimmick">{boss.gimmick_description}</span>
+        </div>
+      )}
+
       <ScoreDisplay
         score={roundScore}
         target={roundTarget}
@@ -121,6 +139,20 @@ export function Board() {
       />
 
       <ArtifactBar artifacts={artifacts} />
+
+      {/* Gadgets display */}
+      {gadgets.length > 0 && (
+        <div className="gadget-bar">
+          <span className="gadget-bar-label">道具:</span>
+          <div className="gadget-list">
+            {gadgets.map((g) => (
+              <div key={g.id} className="gadget-slot" title={g.description_zh}>
+                <span className="gadget-icon">{g.name_zh[0]}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <HandDisplay
         tiles={handTiles}
@@ -139,9 +171,9 @@ export function Board() {
         <button
           className="btn btn-secondary"
           onClick={handleSkip}
-          disabled={isLoading || roundOver}
+          disabled={isLoading || roundOver || skipBlocked}
         >
-          跳过(+8牌)
+          {skipBlocked ? "Boss禁止跳过" : "跳过(+8牌)"}
         </button>
         <span className="selected-count">
           已选 {selectedTileIds.length} 张

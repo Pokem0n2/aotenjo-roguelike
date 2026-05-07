@@ -21,6 +21,12 @@ pub fn run() {
             commands::game_cmds::skip_play,
             commands::game_cmds::end_round,
             commands::game_cmds::start_next_round,
+            commands::shop_cmds::shop_buy,
+            commands::shop_cmds::shop_sell_artifact,
+            commands::shop_cmds::shop_sell_gadget,
+            commands::shop_cmds::shop_reroll,
+            commands::shop_cmds::shop_leave,
+            commands::shop_cmds::use_gadget,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

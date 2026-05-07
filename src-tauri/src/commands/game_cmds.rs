@@ -2,8 +2,9 @@ use std::sync::Mutex;
 use tauri::State;
 
 use crate::game::state::GameState;
+use crate::game::shop::ShopItemType;
 use crate::models::tile::Tile;
-use crate::models::artifact::{Artifact, Rarity};
+use crate::models::artifact::Artifact;
 
 #[derive(serde::Serialize)]
 pub struct GameStateView {
@@ -18,6 +19,12 @@ pub struct GameStateView {
     pub round_target: u64,
     pub currency: u32,
     pub artifacts: Vec<ArtifactView>,
+    pub gadgets: Vec<GadgetView>,
+    pub boss: Option<BossView>,
+    pub tax_per_play: u32,
+    pub boss_disabled: bool,
+    pub shop_items: Vec<ShopItemView>,
+    pub shop_rerolls: u8,
 }
 
 #[derive(serde::Serialize)]
@@ -64,6 +71,73 @@ impl From<&Artifact> for ArtifactView {
             sell_value: artifact.sell_value,
         }
     }
+}
+
+#[derive(serde::Serialize)]
+pub struct GadgetView {
+    pub id: String,
+    pub name_zh: String,
+    pub name_en: String,
+    pub description_zh: String,
+}
+
+impl From<&crate::models::gadget::Gadget> for GadgetView {
+    fn from(gadget: &crate::models::gadget::Gadget) -> Self {
+        Self {
+            id: gadget.id.clone(),
+            name_zh: gadget.name_zh.clone(),
+            name_en: gadget.name_en.clone(),
+            description_zh: gadget.description_zh.clone(),
+        }
+    }
+}
+
+#[derive(serde::Serialize)]
+pub struct BossView {
+    pub id: String,
+    pub name_zh: String,
+    pub name_en: String,
+    pub gimmick_description: String,
+    pub score_multiplier: f64,
+}
+
+impl From<&crate::models::boss::Boss> for BossView {
+    fn from(boss: &crate::models::boss::Boss) -> Self {
+        let gimmick_description = match &boss.gimmick {
+            crate::models::boss::BossGimmick::BlindSuit(suit) => {
+                let suit_name = match suit {
+                    crate::models::tile::TileSuit::Manzu => "万子",
+                    crate::models::tile::TileSuit::Pinzu => "筒子",
+                    crate::models::tile::TileSuit::Souzu => "索子",
+                    _ => "未知",
+                };
+                format!("隐藏所有{}牌面", suit_name)
+            }
+            crate::models::boss::BossGimmick::ReducedPlays(n) => format!("出牌次数减少为{}", n),
+            crate::models::boss::BossGimmick::NoDiscard => "禁止跳过出牌".to_string(),
+            crate::models::boss::BossGimmick::TaxPerPlay(t) => format!("每次出牌缴纳{}金币", t),
+            crate::models::boss::BossGimmick::ScoreThresholdScale(s) => format!("目标分数×{:.1}", s),
+            crate::models::boss::BossGimmick::ForcedPattern(p) => format!("完成特定牌型可获得奖励番"),
+        };
+        Self {
+            id: boss.id.clone(),
+            name_zh: boss.name_zh.clone(),
+            name_en: boss.name_en.clone(),
+            gimmick_description,
+            score_multiplier: boss.score_multiplier,
+        }
+    }
+}
+
+#[derive(serde::Serialize)]
+pub struct ShopItemView {
+    pub index: usize,
+    pub item_type: String,
+    pub cost: u32,
+    pub sold: bool,
+    pub name_zh: String,
+    pub description_zh: String,
+    pub rarity: Option<String>,
 }
 
 #[tauri::command]
@@ -195,6 +269,30 @@ impl From<&GameState> for GameStateView {
             let sb = suit_sort_key(&b.suit, b.rank);
             sa.cmp(&sb)
         });
+
+        let shop_items: Vec<ShopItemView> = state.shop_items.iter().enumerate().map(|(i, item)| {
+            match &item.item_type {
+                ShopItemType::Artifact(a) => ShopItemView {
+                    index: i,
+                    item_type: "artifact".to_string(),
+                    cost: item.cost,
+                    sold: item.sold,
+                    name_zh: a.name_zh.clone(),
+                    description_zh: a.description_zh.clone(),
+                    rarity: Some(format!("{:?}", a.rarity)),
+                },
+                ShopItemType::Gadget(g) => ShopItemView {
+                    index: i,
+                    item_type: "gadget".to_string(),
+                    cost: item.cost,
+                    sold: item.sold,
+                    name_zh: g.name_zh.clone(),
+                    description_zh: g.description_zh.clone(),
+                    rarity: None,
+                },
+            }
+        }).collect();
+
         Self {
             phase: format!("{:?}", state.phase),
             current_wind: format!("{:?}", state.current_wind),
@@ -207,6 +305,12 @@ impl From<&GameState> for GameStateView {
             round_target: state.round_target,
             currency: state.currency,
             artifacts: state.artifacts.iter().map(ArtifactView::from).collect(),
+            gadgets: state.gadgets.iter().map(GadgetView::from).collect(),
+            boss: state.boss.as_ref().map(BossView::from),
+            tax_per_play: state.tax_per_play,
+            boss_disabled: state.boss_disabled,
+            shop_items,
+            shop_rerolls: state.shop_rerolls,
         }
     }
 }

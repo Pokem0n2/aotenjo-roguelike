@@ -16,4 +16,7 @@ pub enum GadgetEffect {
     PeekWall { count: usize },
     TransformTile,
     BuffTile { fu_bonus: i32, mult_bonus: i32 },
+    DrawExtra { count: usize },
+    DisableBoss,
+    GainCurrency { amount: u32 },
 }

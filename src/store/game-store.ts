@@ -18,6 +18,31 @@ export interface ArtifactView {
   sell_value: number;
 }
 
+export interface GadgetView {
+  id: string;
+  name_zh: string;
+  name_en: string;
+  description_zh: string;
+}
+
+export interface BossView {
+  id: string;
+  name_zh: string;
+  name_en: string;
+  gimmick_description: string;
+  score_multiplier: number;
+}
+
+export interface ShopItemView {
+  index: number;
+  item_type: string;
+  cost: number;
+  sold: boolean;
+  name_zh: string;
+  description_zh: string;
+  rarity: string | null;
+}
+
 export interface GameStateView {
   phase: string;
   current_wind: string;
@@ -30,6 +55,12 @@ export interface GameStateView {
   round_target: number;
   currency: number;
   artifacts: ArtifactView[];
+  gadgets: GadgetView[];
+  boss: BossView | null;
+  tax_per_play: number;
+  boss_disabled: boolean;
+  shop_items: ShopItemView[];
+  shop_rerolls: number;
 }
 
 export interface PlayResultView {
@@ -57,6 +88,12 @@ interface GameStore {
   roundTarget: number;
   currency: number;
   artifacts: ArtifactView[];
+  gadgets: GadgetView[];
+  boss: BossView | null;
+  taxPerPlay: number;
+  bossDisabled: boolean;
+  shopItems: ShopItemView[];
+  shopRerolls: number;
   lastPlayResult: PlayResultView | null;
   isLoading: boolean;
   error: string | null;
@@ -81,6 +118,12 @@ export const useGameStore = create<GameStore>((set) => ({
   roundTarget: 0,
   currency: 0,
   artifacts: [],
+  gadgets: [],
+  boss: null,
+  taxPerPlay: 0,
+  bossDisabled: false,
+  shopItems: [],
+  shopRerolls: 0,
   lastPlayResult: null,
   isLoading: false,
   error: null,
@@ -98,6 +141,12 @@ export const useGameStore = create<GameStore>((set) => ({
       roundTarget: view.round_target,
       currency: view.currency,
       artifacts: view.artifacts,
+      gadgets: view.gadgets,
+      boss: view.boss,
+      taxPerPlay: view.tax_per_play,
+      bossDisabled: view.boss_disabled,
+      shopItems: view.shop_items,
+      shopRerolls: view.shop_rerolls,
     }),
 
   setSelectedTileIds: (ids) => set({ selectedTileIds: ids }),
