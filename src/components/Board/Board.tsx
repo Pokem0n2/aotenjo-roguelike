@@ -1,6 +1,6 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useGameStore } from "../../store/game-store";
-import { selectTilesForPlay, submitPlay, getGameState, skipPlay } from "../../api/game";
+import { selectTilesForPlay, submitPlay, getGameState, skipPlay, saveGame } from "../../api/game";
 import { HandDisplay } from "./HandDisplay";
 import { ScoreDisplay } from "../Scoring/ScoreDisplay";
 import { ArtifactBar } from "../Artifacts/ArtifactBar";
@@ -39,6 +39,18 @@ export function Board() {
 
   const windNames: Record<string, string> = { East: "东", South: "南", West: "西", North: "北" };
   const roundOver = currentPlay >= maxPlays || roundScore >= roundTarget;
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+
+  const handleQuickSave = useCallback(async () => {
+    try {
+      const result = await saveGame(0);
+      setSaveMsg(result.message);
+      setTimeout(() => setSaveMsg(null), 2000);
+    } catch (e) {
+      setSaveMsg(String(e));
+      setTimeout(() => setSaveMsg(null), 3000);
+    }
+  }, []);
 
   // Check if skip is blocked by boss
   const skipBlocked = !bossDisabled && boss !== null &&
@@ -121,7 +133,12 @@ export function Board() {
         </span>
         <span className="currency">💰 {currency}</span>
         <span className="wall-info">牌墙剩余: {wallRemaining}</span>
+        <button className="btn btn-secondary btn-sm" onClick={handleQuickSave}>
+          存档
+        </button>
       </div>
+
+      {saveMsg && <div className="save-toast">{saveMsg}</div>}
 
       {/* Boss display */}
       {boss && !bossDisabled && (

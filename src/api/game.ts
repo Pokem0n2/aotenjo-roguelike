@@ -70,3 +70,34 @@ export async function shopLeave(): Promise<GameStateView> {
 export async function useGadget(gadgetId: string, tileIds: number[]): Promise<GadgetUseResult> {
   return invoke("use_gadget", { gadgetId, tileIds });
 }
+
+// Save/Load
+export interface SaveMeta {
+  slot: number;
+  wind: string;
+  round: number;
+  currency: number;
+  timestamp: string;
+}
+
+export interface SaveResult {
+  success: boolean;
+  message: string;
+  meta: SaveMeta | null;
+}
+
+export async function saveGame(slot: number): Promise<SaveResult> {
+  return invoke("save_game", { slot });
+}
+
+export async function loadGame(slot: number): Promise<GameStateView> {
+  return invoke("load_game", { slot });
+}
+
+export async function listSaves(): Promise<SaveMeta[]> {
+  return invoke("list_saves");
+}
+
+export async function deleteSave(slot: number): Promise<string> {
+  return invoke("delete_save", { slot });
+}

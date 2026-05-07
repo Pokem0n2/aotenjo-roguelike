@@ -808,3 +808,221 @@
 .btn-danger:hover {
   background: rgba(230, 57, 70, 0.3);
 }
+
+/* Small button */
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+/* Save slots */
+.save-slots {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.save-slot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.save-slot-info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.save-slot-label {
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.save-slot-detail {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.save-slot-empty {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.save-slot-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Save toast */
+.save-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(42, 157, 143, 0.95);
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 100;
+  animation: fadeInUp 0.2s ease;
+}
+
+/* Settings overlay */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.settings-menu {
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 300px;
+}
+
+.settings-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.settings-lang-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Pattern codex */
+.codex-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.codex-menu {
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.codex-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-align: center;
+}
+
+.codex-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.codex-card {
+  width: 160px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.codex-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.codex-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.codex-fan {
+  font-size: 13px;
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+/* Main menu footer */
+.main-menu-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.main-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Score counter animation */
+@keyframes scoreCountUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.score-current {
+  animation: scoreCountUp 0.3s ease-out;
+}
+
+/* Score popup float */
+@keyframes scoreFloat {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+
+.score-popup {
+  position: absolute;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  animation: scoreFloat 1.2s ease-out forwards;
+  pointer-events: none;
+}

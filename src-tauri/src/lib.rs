@@ -3,6 +3,7 @@ use std::sync::Mutex;
 mod models;
 mod game;
 mod commands;
+mod persistence;
 
 use game::state::GameState;
 
@@ -27,6 +28,10 @@ pub fn run() {
             commands::shop_cmds::shop_reroll,
             commands::shop_cmds::shop_leave,
             commands::shop_cmds::use_gadget,
+            commands::save_cmds::save_game,
+            commands::save_cmds::load_game,
+            commands::save_cmds::list_saves,
+            commands::save_cmds::delete_save,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
