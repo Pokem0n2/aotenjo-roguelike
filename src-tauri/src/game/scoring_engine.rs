@@ -96,12 +96,25 @@ pub fn calculate_score(
     // ── Final calculation ──
     let total_fu = tile_fu + artifact_fu;
     let total_fan = base_fan + pattern_fan + artifact_fan;
-    let final_score = (total_fu as f64 * total_fan * cumulative_mult) as u64;
+
+    // Meld-type multiplier: Chi+Pair ×2, Pon+Pair ×4, Kan+Pair ×8
+    let meld_multiplier = if play.melds.iter().any(|m| m.kind == MeldKind::Kan) {
+        8.0
+    } else if play.melds.iter().any(|m| m.kind == MeldKind::Pon) {
+        4.0
+    } else {
+        2.0
+    };
+    if meld_multiplier > 1.0 {
+        breakdown.push(format!("牌型倍率: ×{:.0}", meld_multiplier));
+    }
+
+    let final_score = (total_fu as f64 * total_fan * cumulative_mult * meld_multiplier) as u64;
 
     ScoreResult {
         fu: total_fu,
         fan: total_fan,
-        mult: cumulative_mult,
+        mult: cumulative_mult * meld_multiplier,
         final_score,
         breakdown,
     }
@@ -156,7 +169,7 @@ mod tests {
         assert!(result.final_score > 0);
         assert!(result.fu > 0);
         assert!(result.fan > 0.0);
-        assert!(result.mult == 1.0);
+        assert!(result.mult > 1.0); // includes meld-type multiplier
     }
 
     #[test]
