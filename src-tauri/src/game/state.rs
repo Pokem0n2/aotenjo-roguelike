@@ -90,7 +90,7 @@ impl GameState {
             gadgets: Vec::new(),
             currency: 0,
             boss: None,
-            max_plays: 4,
+            max_plays: 20,
             tax_per_play: 0,
             shop_items: Vec::new(),
             shop_rerolls: 2,
@@ -489,7 +489,7 @@ impl GameState {
             crate::models::gadget::GadgetEffect::DisableBoss => {
                 self.boss_disabled = true;
                 // Restore default max_plays and remove tax
-                self.max_plays = 4;
+                self.max_plays = 20;
                 self.tax_per_play = 0;
                 Ok("已移除Boss效果!".to_string())
             }
