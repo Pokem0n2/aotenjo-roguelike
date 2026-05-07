@@ -6,46 +6,44 @@ interface TileProps {
   onClick?: () => void;
 }
 
-const SUIT_SYMBOLS: Record<string, { char: string; color: string }> = {
-  Manzu: { char: "万", color: "#1565c0" },
-  Pinzu: { char: "筒", color: "#1b5e20" },
-  Souzu: { char: "索", color: "#2e7d32" },
-  Wind: { char: "", color: "#37474f" },
-  Dragon: { char: "", color: "#b71c1c" },
+// 每种花色统一颜色：万=红、索=绿、筒=黑
+const SUIT_CONFIG: Record<string, { char: string; color: string }> = {
+  Manzu:  { char: "万", color: "#c62828" }, // 红色
+  Pinzu:  { char: "筒", color: "#212121" }, // 黑色
+  Souzu:  { char: "索", color: "#2e7d32" }, // 绿色
+  Wind:   { char: "",   color: "#37474f" },
+  Dragon: { char: "",   color: "#37474f" },
 };
 
 const WIND_CHARS = ["东", "南", "西", "北"];
 const DRAGON_CHARS = ["白", "發", "中"];
+const DRAGON_COLORS = ["#757575", "#2e7d32", "#c62828"];
 const NUM_CHARS = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
 
 function getTileDisplay(tile: TileView): { top: string; bottom: string; color: string } {
-  const suitInfo = SUIT_SYMBOLS[tile.suit] || { char: "", color: "#333" };
-
   switch (tile.suit) {
     case "Manzu":
     case "Pinzu":
     case "Souzu": {
-      const numChar = NUM_CHARS[tile.rank - 1];
+      const cfg = SUIT_CONFIG[tile.suit];
       return {
-        top: numChar,
-        bottom: suitInfo.char,
-        color: tile.is_red ? "#c62828" : suitInfo.color,
+        top: NUM_CHARS[tile.rank - 1],
+        bottom: cfg.char,
+        color: cfg.color,
       };
     }
     case "Wind":
       return {
         top: WIND_CHARS[tile.rank - 1],
-        bottom: "風",
-        color: "#37474f",
+        bottom: "",
+        color: SUIT_CONFIG.Wind.color,
       };
-    case "Dragon": {
-      const colors = ["#9e9e9e", "#2e7d32", "#c62828"];
+    case "Dragon":
       return {
         top: DRAGON_CHARS[tile.rank - 1],
         bottom: "",
-        color: colors[tile.rank - 1],
+        color: DRAGON_COLORS[tile.rank - 1],
       };
-    }
     default:
       return { top: "?", bottom: "", color: "#333" };
   }

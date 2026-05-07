@@ -101,13 +101,20 @@ pub fn submit_play(state: State<'_, Mutex<GameState>>) -> Result<PlayResultView,
 
 impl From<&GameState> for GameStateView {
     fn from(state: &GameState) -> Self {
+        // Sort hand: Manzu < Pinzu < Souzu < Wind < Dragon, then by rank
+        let mut tiles: Vec<TileView> = state.hand_tiles.iter().map(TileView::from).collect();
+        tiles.sort_by(|a, b| {
+            let sa = suit_sort_key(&a.suit, a.rank);
+            let sb = suit_sort_key(&b.suit, b.rank);
+            sa.cmp(&sb)
+        });
         Self {
             phase: format!("{:?}", state.phase),
             current_wind: format!("{:?}", state.current_wind),
             current_round: state.current_round,
             current_play: state.current_play,
             max_plays: state.max_plays,
-            hand_tiles: state.hand_tiles.iter().map(TileView::from).collect(),
+            hand_tiles: tiles,
             wall_remaining: state.wall.remaining(),
             round_score: state.round_score,
             round_target: state.round_target,
@@ -115,4 +122,16 @@ impl From<&GameState> for GameStateView {
             artifact_count: state.artifacts.len(),
         }
     }
+}
+
+fn suit_sort_key(suit: &str, rank: u8) -> (u8, u8) {
+    let order = match suit {
+        "Manzu" => 0,
+        "Pinzu" => 1,
+        "Souzu" => 2,
+        "Wind" => 3,
+        "Dragon" => 4,
+        _ => 5,
+    };
+    (order, rank)
 }

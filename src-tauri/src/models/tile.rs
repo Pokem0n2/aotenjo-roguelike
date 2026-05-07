@@ -91,6 +91,17 @@ impl Tile {
         }
     }
 
+    /// Sort order: Manzu < Pinzu < Souzu < Wind < Dragon, then by rank
+    pub fn suit_order(&self) -> u8 {
+        match self.suit {
+            TileSuit::Manzu => 0,
+            TileSuit::Pinzu => 1,
+            TileSuit::Souzu => 2,
+            TileSuit::Wind => 3,
+            TileSuit::Dragon => 4,
+        }
+    }
+
     pub fn display_short(&self) -> String {
         match self.suit {
             TileSuit::Manzu => format!("{}m", self.rank),
