@@ -3,6 +3,7 @@ use tauri::State;
 
 use crate::game::state::GameState;
 use crate::models::tile::Tile;
+use crate::models::artifact::{Artifact, Rarity};
 
 #[derive(serde::Serialize)]
 pub struct GameStateView {
@@ -16,7 +17,7 @@ pub struct GameStateView {
     pub round_score: u64,
     pub round_target: u64,
     pub currency: u32,
-    pub artifact_count: usize,
+    pub artifacts: Vec<ArtifactView>,
 }
 
 #[derive(serde::Serialize)]
@@ -38,6 +39,29 @@ impl From<&Tile> for TileView {
             is_red: tile.is_red,
             display_zh: tile.display_zh(),
             base_fu: tile.base_fu(),
+        }
+    }
+}
+
+#[derive(serde::Serialize)]
+pub struct ArtifactView {
+    pub id: String,
+    pub name_zh: String,
+    pub name_en: String,
+    pub description_zh: String,
+    pub rarity: String,
+    pub sell_value: u32,
+}
+
+impl From<&Artifact> for ArtifactView {
+    fn from(artifact: &Artifact) -> Self {
+        Self {
+            id: artifact.id.clone(),
+            name_zh: artifact.name_zh.clone(),
+            name_en: artifact.name_en.clone(),
+            description_zh: artifact.description_zh.clone(),
+            rarity: format!("{:?}", artifact.rarity),
+            sell_value: artifact.sell_value,
         }
     }
 }
@@ -85,23 +109,72 @@ pub struct PlayResultView {
     pub round_score: u64,
     pub round_target: u64,
     pub round_over: bool,
+    pub fu: u64,
+    pub fan: f64,
+    pub mult: f64,
+    pub patterns: Vec<String>,
+    pub breakdown: Vec<String>,
 }
 
 #[tauri::command]
 pub fn submit_play(state: State<'_, Mutex<GameState>>) -> Result<PlayResultView, String> {
     let mut state = state.lock().map_err(|e| e.to_string())?;
     let result = state.submit_play()?;
+    let detail = &result.score_detail;
     Ok(PlayResultView {
         score: result.score,
         round_score: state.round_score,
         round_target: state.round_target,
         round_over: state.is_round_over(),
+        fu: detail.fu,
+        fan: detail.fan,
+        mult: detail.mult,
+        patterns: result.patterns_matched,
+        breakdown: detail.breakdown.clone(),
     })
+}
+
+#[tauri::command]
+pub fn end_round(state: State<'_, Mutex<GameState>>) -> Result<EndRoundView, String> {
+    let mut state = state.lock().map_err(|e| e.to_string())?;
+    let outcome = state.end_round();
+    let view = match outcome {
+        crate::game::state::RoundOutcome::Pass { score, target, bonus } => EndRoundView {
+            passed: true,
+            score,
+            target,
+            bonus,
+            victory: false,
+        },
+        crate::game::state::RoundOutcome::Fail { score, target } => EndRoundView {
+            passed: false,
+            score,
+            target,
+            bonus: 0,
+            victory: false,
+        },
+        crate::game::state::RoundOutcome::Victory => EndRoundView {
+            passed: true,
+            score: state.round_score,
+            target: state.round_target,
+            bonus: 0,
+            victory: true,
+        },
+    };
+    Ok(view)
+}
+
+#[derive(serde::Serialize)]
+pub struct EndRoundView {
+    pub passed: bool,
+    pub score: u64,
+    pub target: u64,
+    pub bonus: u32,
+    pub victory: bool,
 }
 
 impl From<&GameState> for GameStateView {
     fn from(state: &GameState) -> Self {
-        // Sort hand: Manzu < Pinzu < Souzu < Wind < Dragon, then by rank
         let mut tiles: Vec<TileView> = state.hand_tiles.iter().map(TileView::from).collect();
         tiles.sort_by(|a, b| {
             let sa = suit_sort_key(&a.suit, a.rank);
@@ -119,7 +192,7 @@ impl From<&GameState> for GameStateView {
             round_score: state.round_score,
             round_target: state.round_target,
             currency: state.currency,
-            artifact_count: state.artifacts.len(),
+            artifacts: state.artifacts.iter().map(ArtifactView::from).collect(),
         }
     }
 }

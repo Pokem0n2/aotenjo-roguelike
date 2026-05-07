@@ -12,7 +12,7 @@ export function ScoreDisplay({ score, target, lastResult }: ScoreDisplayProps) {
 
   return (
     <div className="score-display">
-      <div className="score-bar">
+      <div className="score-main">
         <div className="score-labels">
           <span className="score-current">
             {score.toLocaleString()}
@@ -29,9 +29,30 @@ export function ScoreDisplay({ score, target, lastResult }: ScoreDisplayProps) {
           />
         </div>
       </div>
+
       {lastResult && (
-        <div className="last-score">
-          +{lastResult.score.toLocaleString()}
+        <div className="score-detail">
+          <div className="score-formula">
+            {lastResult.fu}符 × {lastResult.fan.toFixed(1)}番
+            {lastResult.mult > 1.0 && ` × ${lastResult.mult.toFixed(1)}`}
+            {" = "}
+            <strong>{lastResult.score.toLocaleString()}</strong>
+          </div>
+          {lastResult.patterns.length > 0 && (
+            <div className="score-patterns">
+              {lastResult.patterns.map((p, i) => (
+                <span key={i} className="pattern-tag">{p}</span>
+              ))}
+            </div>
+          )}
+          {lastResult.breakdown.length > 0 && (
+            <details className="score-breakdown">
+              <summary>计分明细</summary>
+              {lastResult.breakdown.map((line, i) => (
+                <div key={i} className="breakdown-line">{line}</div>
+              ))}
+            </details>
+          )}
         </div>
       )}
     </div>

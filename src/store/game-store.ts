@@ -9,6 +9,15 @@ export interface TileView {
   base_fu: number;
 }
 
+export interface ArtifactView {
+  id: string;
+  name_zh: string;
+  name_en: string;
+  description_zh: string;
+  rarity: string;
+  sell_value: number;
+}
+
 export interface GameStateView {
   phase: string;
   current_wind: string;
@@ -20,7 +29,7 @@ export interface GameStateView {
   round_score: number;
   round_target: number;
   currency: number;
-  artifact_count: number;
+  artifacts: ArtifactView[];
 }
 
 export interface PlayResultView {
@@ -28,6 +37,11 @@ export interface PlayResultView {
   round_score: number;
   round_target: number;
   round_over: boolean;
+  fu: number;
+  fan: number;
+  mult: number;
+  patterns: string[];
+  breakdown: string[];
 }
 
 interface GameStore {
@@ -42,6 +56,7 @@ interface GameStore {
   roundScore: number;
   roundTarget: number;
   currency: number;
+  artifacts: ArtifactView[];
   lastPlayResult: PlayResultView | null;
   isLoading: boolean;
   error: string | null;
@@ -65,6 +80,7 @@ export const useGameStore = create<GameStore>((set) => ({
   roundScore: 0,
   roundTarget: 0,
   currency: 0,
+  artifacts: [],
   lastPlayResult: null,
   isLoading: false,
   error: null,
@@ -81,6 +97,7 @@ export const useGameStore = create<GameStore>((set) => ({
       roundScore: view.round_score,
       roundTarget: view.round_target,
       currency: view.currency,
+      artifacts: view.artifacts,
     }),
 
   setSelectedTileIds: (ids) => set({ selectedTileIds: ids }),

@@ -18,6 +18,7 @@ pub fn run() {
             commands::game_cmds::get_game_state,
             commands::game_cmds::select_tiles_for_play,
             commands::game_cmds::submit_play,
+            commands::game_cmds::end_round,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

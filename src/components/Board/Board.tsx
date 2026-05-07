@@ -3,6 +3,7 @@ import { useGameStore } from "../../store/game-store";
 import { selectTilesForPlay, submitPlay, getGameState } from "../../api/game";
 import { HandDisplay } from "./HandDisplay";
 import { ScoreDisplay } from "../Scoring/ScoreDisplay";
+import { ArtifactBar } from "../Artifacts/ArtifactBar";
 
 export function Board() {
   const {
@@ -16,8 +17,10 @@ export function Board() {
     roundScore,
     roundTarget,
     currency,
+    artifacts,
     isLoading,
     lastPlayResult,
+    error,
   } = useGameStore();
 
   const setSelectedTileIds = useGameStore((s) => s.setSelectedTileIds);
@@ -89,6 +92,8 @@ export function Board() {
         lastResult={lastPlayResult}
       />
 
+      <ArtifactBar artifacts={artifacts} />
+
       <HandDisplay
         tiles={handTiles}
         selectedIds={selectedTileIds}
@@ -107,6 +112,10 @@ export function Board() {
           已选 {selectedTileIds.length} 张
         </span>
       </div>
+
+      {error && (
+        <div className="error-toast">{error}</div>
+      )}
 
       {lastPlayResult && (
         <div className="play-result-toast">
