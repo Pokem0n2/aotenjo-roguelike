@@ -32,3 +32,11 @@ export async function submitPlay(): Promise<PlayResultView> {
 export async function endRound(): Promise<EndRoundView> {
   return invoke("end_round");
 }
+
+export async function skipPlay(): Promise<GameStateView> {
+  return invoke("skip_play");
+}
+
+export async function startNextRound(): Promise<GameStateView> {
+  return invoke("start_next_round");
+}

@@ -1,12 +1,16 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useGameStore } from "../../store/game-store";
-import { selectTilesForPlay, submitPlay, getGameState } from "../../api/game";
+import { selectTilesForPlay, submitPlay, getGameState, skipPlay } from "../../api/game";
 import { HandDisplay } from "./HandDisplay";
 import { ScoreDisplay } from "../Scoring/ScoreDisplay";
 import { ArtifactBar } from "../Artifacts/ArtifactBar";
+import { RoundResult } from "../GameFlow/RoundResult";
+import { GameOver } from "../GameFlow/GameOver";
+import { VictoryScreen } from "../GameFlow/VictoryScreen";
 
 export function Board() {
   const {
+    phase,
     currentWind,
     currentRound,
     currentPlay,
@@ -29,21 +33,28 @@ export function Board() {
   const setLoading = useGameStore((s) => s.setLoading);
   const setError = useGameStore((s) => s.setError);
 
-  const windNames: Record<string, string> = {
-    East: "东",
-    South: "南",
-    West: "西",
-    North: "北",
-  };
+  const windNames: Record<string, string> = { East: "东", South: "南", West: "西", North: "北" };
+  const roundOver = currentPlay >= maxPlays || roundScore >= roundTarget;
+
+  // Auto-detect round over → switch to RoundResult phase
+  useEffect(() => {
+    if (phase === "Playing" && roundOver && currentPlay > 0) {
+      useGameStore.setState({ phase: "RoundResult" });
+    }
+  }, [phase, roundOver, currentPlay]);
+
+  const refreshState = useCallback(async () => {
+    const state = await getGameState();
+    setFromStateView(state);
+    setSelectedTileIds([]);
+  }, [setFromStateView, setSelectedTileIds]);
 
   const handleTileClick = useCallback(
     async (tileId: number) => {
       const newSelected = selectedTileIds.includes(tileId)
         ? selectedTileIds.filter((id) => id !== tileId)
         : [...selectedTileIds, tileId];
-
       setSelectedTileIds(newSelected);
-
       try {
         await selectTilesForPlay(newSelected);
       } catch (e) {
@@ -63,7 +74,19 @@ export function Board() {
     try {
       const result = await submitPlay();
       setLastPlayResult(result);
-      const state = await getGameState();
+      await refreshState();
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedTileIds, setLastPlayResult, refreshState, setLoading, setError]);
+
+  const handleSkip = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const state = await skipPlay();
       setFromStateView(state);
       setSelectedTileIds([]);
     } catch (e) {
@@ -71,7 +94,12 @@ export function Board() {
     } finally {
       setLoading(false);
     }
-  }, [selectedTileIds, setLastPlayResult, setFromStateView, setSelectedTileIds, setLoading, setError]);
+  }, [setFromStateView, setSelectedTileIds, setLoading, setError]);
+
+  // Phase routing
+  if (phase === "GameOver") return <GameOver />;
+  if (phase === "Victory") return <VictoryScreen />;
+  if (phase === "RoundResult") return <RoundResult />;
 
   return (
     <div className="board">
@@ -108,20 +136,19 @@ export function Board() {
         >
           {isLoading ? "计算中..." : "出牌"}
         </button>
+        <button
+          className="btn btn-secondary"
+          onClick={handleSkip}
+          disabled={isLoading || roundOver}
+        >
+          跳过(+8牌)
+        </button>
         <span className="selected-count">
           已选 {selectedTileIds.length} 张
         </span>
       </div>
 
-      {error && (
-        <div className="error-toast">{error}</div>
-      )}
-
-      {lastPlayResult && (
-        <div className="play-result-toast">
-          本手得分: {lastPlayResult.score.toLocaleString()}
-        </div>
-      )}
+      {error && <div className="error-toast">{error}</div>}
     </div>
   );
 }

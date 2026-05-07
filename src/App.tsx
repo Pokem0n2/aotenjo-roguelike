@@ -6,13 +6,18 @@ import "./App.css";
 function App() {
   const phase = useGameStore((s) => s.phase);
 
+  if (phase === "MainMenu" || phase === "DeckSelect") {
+    return (
+      <div className="app">
+        <MainMenu />
+      </div>
+    );
+  }
+
+  // Playing, RoundResult, Shop, GameOver, Victory — all handled by Board
   return (
     <div className="app">
-      {phase === "MainMenu" || phase === "DeckSelect" ? (
-        <MainMenu />
-      ) : (
-        <Board />
-      )}
+      <Board />
     </div>
   );
 }

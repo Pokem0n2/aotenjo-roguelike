@@ -204,6 +204,32 @@ impl GameState {
         self.current_play >= self.max_plays || self.round_score >= self.round_target
     }
 
+    /// Skip a play — forfeit scoring but gain 8 extra discards
+    pub fn skip_play(&mut self) {
+        self.current_play += 1;
+
+        // Give 8 extra tiles from wall as "discards" (added to hand)
+        let draw = std::cmp::min(8, self.wall.remaining());
+        if draw > 0 {
+            self.draw_more_tiles(draw);
+        }
+
+        // Update scaling artifacts even on skip
+        for artifact in &mut self.artifacts {
+            if let crate::models::artifact::ArtifactEffect::ScalingAddFu { per_round, ref mut current } = artifact.effect {
+                *current += per_round;
+            }
+            if let crate::models::artifact::ArtifactEffect::ScalingAddFan { per_round, ref mut current } = artifact.effect {
+                *current += per_round;
+            }
+        }
+    }
+
+    /// Start the next round after a pass. Called after end_round returns Pass.
+    pub fn start_next_round(&mut self) {
+        self.start_round(self.run_seed);
+    }
+
     pub fn end_round(&mut self) -> RoundOutcome {
         if self.round_score >= self.round_target {
             let overkill_ratio = self.round_score as f64 / self.round_target as f64;

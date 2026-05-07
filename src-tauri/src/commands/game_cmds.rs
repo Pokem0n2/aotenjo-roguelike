@@ -164,6 +164,20 @@ pub fn end_round(state: State<'_, Mutex<GameState>>) -> Result<EndRoundView, Str
     Ok(view)
 }
 
+#[tauri::command]
+pub fn skip_play(state: State<'_, Mutex<GameState>>) -> Result<GameStateView, String> {
+    let mut state = state.lock().map_err(|e| e.to_string())?;
+    state.skip_play();
+    Ok(GameStateView::from(&*state))
+}
+
+#[tauri::command]
+pub fn start_next_round(state: State<'_, Mutex<GameState>>) -> Result<GameStateView, String> {
+    let mut state = state.lock().map_err(|e| e.to_string())?;
+    state.start_next_round();
+    Ok(GameStateView::from(&*state))
+}
+
 #[derive(serde::Serialize)]
 pub struct EndRoundView {
     pub passed: bool,

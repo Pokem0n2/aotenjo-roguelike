@@ -433,3 +433,135 @@
   from { opacity: 1; }
   to { opacity: 0; pointer-events: none; }
 }
+
+/* btn-secondary (skip button) */
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 14px;
+  padding: 10px 20px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Round result */
+.round-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 32px;
+  text-align: center;
+}
+
+.result-title {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 8px;
+}
+
+.result-pass {
+  color: var(--accent-gold);
+  text-shadow: 0 2px 12px rgba(212, 175, 55, 0.5);
+}
+
+.result-fail {
+  color: var(--accent-red);
+  text-shadow: 0 2px 12px rgba(230, 57, 70, 0.5);
+}
+
+.result-score {
+  font-size: 28px;
+  color: var(--text-primary);
+}
+
+.overkill-badge {
+  font-size: 20px;
+  color: #f39c12;
+  font-weight: 700;
+  background: rgba(243, 156, 18, 0.15);
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+/* Game over */
+.game-over-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 48px 32px;
+  text-align: center;
+}
+
+.gameover-title {
+  font-size: 56px;
+  font-weight: 900;
+  color: var(--accent-red);
+  text-shadow: 0 4px 16px rgba(230, 57, 70, 0.5);
+  letter-spacing: 12px;
+}
+
+.gameover-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 32px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 48px;
+  font-size: 18px;
+}
+
+.stat-row span:first-child {
+  color: var(--text-secondary);
+}
+
+.stat-row span:last-child {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Victory */
+.victory-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 48px 32px;
+  text-align: center;
+}
+
+.victory-title {
+  font-size: 72px;
+  font-weight: 900;
+  color: var(--accent-gold);
+  text-shadow: 0 4px 24px rgba(212, 175, 55, 0.6);
+  letter-spacing: 16px;
+}
+
+.victory-subtitle {
+  font-size: 20px;
+  color: var(--accent-blue);
+  letter-spacing: 4px;
+}
+
+.victory-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 32px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+}
