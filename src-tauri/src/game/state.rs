@@ -136,7 +136,7 @@ impl GameState {
         let base_target = self.get_target_score();
         let (max_plays, target, tax) = apply_boss_effects(
             self.boss.as_ref().unwrap(),
-            4,
+            20,
             base_target,
         );
         self.round_target = target;
