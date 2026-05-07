@@ -116,7 +116,7 @@ impl GameState {
             + (self.current_round as u64 * 1000)
             + (self.current_wind as u64 * 10000);
         self.wall = Wall::new(round_seed);
-        self.hand_tiles = self.wall.draw(14);
+        self.hand_tiles = self.wall.draw(21);
         self.selected_tile_ids.clear();
         self.plays_made.clear();
         self.round_score = 0;
@@ -156,10 +156,10 @@ impl GameState {
         let round_index = wind_base + (self.current_round - 1) as u32;
 
         let targets = [
-            300, 800, 2000, 5000,
-            12000, 30000, 80000, 200000,
-            500000, 1500000, 5000000, 15000000,
-            50000000, 200000000, 800000000, 3000000000,
+            100, 300, 800, 2000,
+            5000, 15000, 40000, 100000,
+            300000, 800000, 3000000, 10000000,
+            30000000, 100000000, 400000000, 1500000000,
         ];
 
         targets.get(round_index as usize).copied().unwrap_or(5000000000)
@@ -525,7 +525,7 @@ mod tests {
         let mut state = GameState::new();
         state.start_run(42);
         assert_eq!(state.phase, GamePhase::Playing);
-        assert_eq!(state.hand_tiles.len(), 14);
+        assert_eq!(state.hand_tiles.len(), 21);
         assert!(state.boss.is_some());
     }
 
@@ -535,14 +535,14 @@ mod tests {
         state.start_run(42);
         state.current_wind = Wind::East;
         state.current_round = 1;
-        assert_eq!(state.get_target_score(), 300);
+        assert_eq!(state.get_target_score(), 100);
 
         state.current_round = 2;
-        assert_eq!(state.get_target_score(), 800);
+        assert_eq!(state.get_target_score(), 300);
 
         state.current_wind = Wind::South;
         state.current_round = 1;
-        assert_eq!(state.get_target_score(), 12000);
+        assert_eq!(state.get_target_score(), 5000);
     }
 
     #[test]

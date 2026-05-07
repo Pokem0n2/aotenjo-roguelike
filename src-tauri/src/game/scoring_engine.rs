@@ -26,12 +26,12 @@ pub fn calculate_score(
     }
 
     // ── Phase 2: Meld structure fan ──
-    let mut base_fan: f64 = 1.0;
+    let mut base_fan: f64 = 2.0;
     for meld in &play.melds {
         let bonus = match meld.kind {
-            MeldKind::Pon => 1.0,
-            MeldKind::Kan => 2.0,
-            MeldKind::Chi => 0.5,
+            MeldKind::Pon => 2.0,
+            MeldKind::Kan => 4.0,
+            MeldKind::Chi => 1.0,
             MeldKind::Pair => 0.0,
         };
         base_fan += bonus;
