@@ -74,15 +74,12 @@ export function MainMenu() {
           <button className="btn btn-start" onClick={handleStart} disabled={isLoading}>
             {isLoading ? "加载中..." : "开始新旅途"}
           </button>
-          <button
-            className="btn btn-secondary"
-            onClick={() => setShowSaves(!showSaves)}
-          >
-            {showSaves ? "关闭存档" : "读取存档"}
-          </button>
         </div>
 
         <div className="main-menu-footer">
+          <button className="btn btn-sm btn-secondary" onClick={() => setShowSaves(!showSaves)}>
+            {showSaves ? "关闭存档" : "读取存档"}
+          </button>
           <button className="btn btn-sm btn-secondary" onClick={() => setShowTutorial(true)}>
             游戏教程
           </button>

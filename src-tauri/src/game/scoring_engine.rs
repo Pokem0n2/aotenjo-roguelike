@@ -97,14 +97,8 @@ pub fn calculate_score(
     let total_fu = tile_fu + artifact_fu;
     let total_fan = base_fan + pattern_fan + artifact_fan;
 
-    // Meld-type multiplier: Chi+Pair ×2, Pon+Pair ×4, Kan+Pair ×8
-    let meld_multiplier = if play.melds.iter().any(|m| m.kind == MeldKind::Kan) {
-        8.0
-    } else if play.melds.iter().any(|m| m.kind == MeldKind::Pon) {
-        4.0
-    } else {
-        2.0
-    };
+    // Meld-type multiplier based on play composition
+    let meld_multiplier = compute_meld_multiplier(play);
     if meld_multiplier > 1.0 {
         breakdown.push(format!("牌型倍率: ×{:.0}", meld_multiplier));
     }
@@ -136,6 +130,166 @@ fn evaluate_condition(condition: &str, play: &Play, tiles: &[Tile], _hand_tiles:
         "has_pinzu" => tiles.iter().any(|t| t.suit == crate::models::tile::TileSuit::Pinzu),
         "has_souzu" => tiles.iter().any(|t| t.suit == crate::models::tile::TileSuit::Souzu),
         _ => false,
+    }
+}
+
+fn compute_meld_multiplier(play: &Play) -> f64 {
+    let melds = &play.melds;
+    let has_pair = play.pair.is_some();
+
+    // ── Single-meld + Pair: Chi×2, Pon×4, Kan×8 ──
+    if has_pair && melds.len() == 1 {
+        return match melds[0].kind {
+            MeldKind::Kan => 8.0,
+            MeldKind::Pon => 4.0,
+            MeldKind::Chi => 2.0,
+            MeldKind::Pair => 1.0,
+        };
+    }
+
+    // ── Three Pairs (AA+BB+CC) ──
+    if !has_pair && melds.len() == 3 && melds.iter().all(|m| m.kind == MeldKind::Pair) {
+        return compute_three_pairs_multiplier(melds);
+    }
+
+    // ── Two Melds, no pair: Chi+Chi, Pon+Pon, or Chi+Pon ──
+    if !has_pair && melds.len() == 2 {
+        let kinds: Vec<_> = melds.iter().map(|m| m.kind).collect();
+        if kinds[0] == MeldKind::Chi && kinds[1] == MeldKind::Chi {
+            return compute_chi_chi_multiplier(melds);
+        }
+        if kinds[0] == MeldKind::Pon && kinds[1] == MeldKind::Pon {
+            return compute_pon_pon_multiplier(melds);
+        }
+        // Chi+Pon (either order)
+        if kinds.contains(&MeldKind::Chi) && kinds.contains(&MeldKind::Pon) {
+            return compute_chi_pon_multiplier(melds);
+        }
+    }
+
+    1.0
+}
+
+fn compute_chi_chi_multiplier(melds: &[crate::models::hand::Meld]) -> f64 {
+    let tiles_a = &melds[0].tiles;
+    let tiles_b = &melds[1].tiles;
+    let suit_a = tiles_a[0].suit;
+    let suit_b = tiles_b[0].suit;
+
+    // Sort ranks for each chi
+    let mut ranks_a: Vec<u8> = tiles_a.iter().map(|t| t.rank).collect();
+    let mut ranks_b: Vec<u8> = tiles_b.iter().map(|t| t.rank).collect();
+    ranks_a.sort();
+    ranks_b.sort();
+
+    let same_suit = suit_a == suit_b;
+    let same_ranks = ranks_a == ranks_b;
+
+    if same_suit && same_ranks {
+        8.0 // Same suit + same ranks
+    } else if same_suit {
+        6.0 // Same suit, different ranks
+    } else {
+        4.0 // Different suits
+    }
+}
+
+fn compute_pon_pon_multiplier(melds: &[crate::models::hand::Meld]) -> f64 {
+    let tiles_a = &melds[0].tiles;
+    let tiles_b = &melds[1].tiles;
+    let suit_a = tiles_a[0].suit;
+    let suit_b = tiles_b[0].suit;
+    let rank_a = tiles_a[0].rank;
+    let rank_b = tiles_b[0].rank;
+
+    let same_suit = suit_a == suit_b;
+
+    if same_suit {
+        let diff = (rank_a as i16 - rank_b as i16).unsigned_abs() as u8;
+        if diff == 1 {
+            8.0 // Same suit + adjacent ranks
+        } else {
+            6.0 // Same suit, non-adjacent
+        }
+    } else {
+        4.0 // Different suits
+    }
+}
+
+fn compute_chi_pon_multiplier(melds: &[crate::models::hand::Meld]) -> f64 {
+    let (chi_meld, pon_meld) = if melds[0].kind == MeldKind::Chi {
+        (&melds[0], &melds[1])
+    } else {
+        (&melds[1], &melds[0])
+    };
+
+    let chi_suit = chi_meld.tiles[0].suit;
+    let pon_suit = pon_meld.tiles[0].suit;
+    let pon_rank = pon_meld.tiles[0].rank;
+    let same_suit = chi_suit == pon_suit;
+
+    if same_suit {
+        // Check if pon rank matches any chi tile rank
+        let chi_ranks: Vec<u8> = chi_meld.tiles.iter().map(|t| t.rank).collect();
+        if chi_ranks.contains(&pon_rank) {
+            8.0 // Same suit + rank match
+        } else {
+            6.0 // Same suit, no rank match
+        }
+    } else {
+        4.0 // Different suits
+    }
+}
+
+fn compute_three_pairs_multiplier(melds: &[crate::models::hand::Meld]) -> f64 {
+    let suits: Vec<_> = melds.iter().map(|m| m.tiles[0].suit).collect();
+    let ranks: Vec<u8> = melds.iter().map(|m| m.tiles[0].rank).collect();
+
+    let same_suit_count = {
+        let mut count = 0u8;
+        for i in 0..3 {
+            for j in i + 1..3 {
+                if suits[i] == suits[j] {
+                    count += 1;
+                }
+            }
+        }
+        count
+    };
+
+    // All three different suits
+    if same_suit_count == 0 {
+        return 4.0;
+    }
+
+    // All three same suit
+    if suits[0] == suits[1] && suits[1] == suits[2] {
+        let mut sorted_ranks = ranks.clone();
+        sorted_ranks.sort();
+        let adjacent = sorted_ranks[0] + 1 == sorted_ranks[1]
+            && sorted_ranks[1] + 1 == sorted_ranks[2];
+        if adjacent {
+            8.0 // Three same suit + adjacent ranks
+        } else {
+            7.0 // Three same suit
+        }
+    } else {
+        // Exactly one pair of same suit
+        // Find which two share a suit
+        let mut pair_idx = (0, 1);
+        for i in 0..3 {
+            for j in i + 1..3 {
+                if suits[i] == suits[j] {
+                    pair_idx = (i, j);
+                }
+            }
+        }
+        let adjacent = (ranks[pair_idx.0] as i16 - ranks[pair_idx.1] as i16).unsigned_abs() == 1;
+        if adjacent {
+            6.0 // Two same suit + adjacent
+        } else {
+            5.0 // Two same suit
+        }
     }
 }
 

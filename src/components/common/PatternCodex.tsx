@@ -78,17 +78,18 @@ export function PatternCodex({ onClose }: { onClose: () => void }) {
           {PATTERNS.map((p) => (
             <div key={p.id} className="codex-card">
               <div className="codex-name">{p.name_zh}</div>
-              <div className="codex-desc">{p.desc}</div>
-              <div className="codex-example">
-                {p.example.map((t, i) => (
-                  <img
-                    key={i}
-                    className="codex-tile-img"
-                    src={getTileImagePathFromSuitRank(t.suit, t.rank)}
-                    alt={`${t.suit}${t.rank}`}
-                  />
-                ))}
-                <span className="codex-ellipsis">...</span>
+              <div className="codex-info">
+                <div className="codex-desc">{p.desc}</div>
+                <div className="codex-example">
+                  {p.example.map((t, i) => (
+                    <img
+                      key={i}
+                      className="codex-tile-img"
+                      src={getTileImagePathFromSuitRank(t.suit, t.rank)}
+                      alt={`${t.suit}${t.rank}`}
+                    />
+                  ))}
+                </div>
               </div>
               <div className="codex-fan">{p.base_fan}番</div>
             </div>

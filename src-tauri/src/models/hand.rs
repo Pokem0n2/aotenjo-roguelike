@@ -62,30 +62,28 @@ impl Play {
 }
 
 /// Validate whether selected tiles form a valid play structure:
-/// - One meld (3 or 4 tiles) + one pair (2 tiles)
-///   = 5 tiles (chi/pon + pair) or 6 tiles (kan + pair)
+/// - 5 tiles: meld(3) + pair(2) — chi/pon + pair
+/// - 6 tiles: kan(4)+pair(2), chi(3)+chi(3), pon(3)+pon(3), chi(3)+pon(3), or pair(2)×3
+/// - 14 tiles: full hand (4 melds + pair / seven pairs / thirteen orphans)
 pub fn validate_play_structure(tiles: &[Tile]) -> Result<Play, String> {
     if tiles.len() < 5 || tiles.len() > 14 {
         return Err(format!("选牌数量无效: {}张 (需要5-14张)", tiles.len()));
     }
 
-    // For the basic play, expect 5 or 6 tiles (one meld + one pair)
     if tiles.len() == 5 || tiles.len() == 6 {
         return validate_single_meld_play(tiles);
     }
 
-    // For a full hand (14 tiles), validate standard 4-meld + pair structure
     validate_full_hand(tiles)
 }
 
 fn validate_single_meld_play(tiles: &[Tile]) -> Result<Play, String> {
     let n = tiles.len();
 
-    // Try to find a valid meld + pair combination
     if n == 5 {
         // 3-tile meld + 2-tile pair
-        for i in 0..tiles.len() {
-            for j in i + 1..tiles.len() {
+        for i in 0..n {
+            for j in i + 1..n {
                 let pair_tiles = vec![tiles[i], tiles[j]];
                 if is_pair(&pair_tiles) {
                     let remaining: Vec<Tile> = tiles
@@ -94,7 +92,6 @@ fn validate_single_meld_play(tiles: &[Tile]) -> Result<Play, String> {
                         .filter(|(idx, _)| *idx != i && *idx != j)
                         .map(|(_, t)| *t)
                         .collect();
-
                     if let Some(kind) = is_meld(&remaining) {
                         return Ok(Play::new(
                             vec![Meld::new(kind, remaining)],
@@ -105,32 +102,111 @@ fn validate_single_meld_play(tiles: &[Tile]) -> Result<Play, String> {
             }
         }
     } else if n == 6 {
-        // 4-tile kan + 2-tile pair
-        for i in 0..tiles.len() {
-            for j in i + 1..tiles.len() {
-                let pair_tiles = vec![tiles[i], tiles[j]];
-                if is_pair(&pair_tiles) {
+        // Try kan(4) + pair(2)
+        if let Some(result) = try_kan_pair(tiles) {
+            return Ok(result);
+        }
+        // Try chi(3) + chi(3)
+        if let Some(result) = try_two_melds(tiles) {
+            return Ok(result);
+        }
+        // Try three pairs
+        if let Some(result) = try_three_pairs(tiles) {
+            return Ok(result);
+        }
+    }
+
+    Err("选中的牌无法组成合法的牌型组合".to_string())
+}
+
+fn try_kan_pair(tiles: &[Tile]) -> Option<Play> {
+    for i in 0..tiles.len() {
+        for j in i + 1..tiles.len() {
+            let pair_tiles = vec![tiles[i], tiles[j]];
+            if is_pair(&pair_tiles) {
+                let remaining: Vec<Tile> = tiles
+                    .iter()
+                    .enumerate()
+                    .filter(|(idx, _)| *idx != i && *idx != j)
+                    .map(|(_, t)| *t)
+                    .collect();
+                if remaining.len() == 4 && is_kan(&remaining) {
+                    return Some(Play::new(
+                        vec![Meld::new(MeldKind::Kan, remaining)],
+                        Some(Meld::new(MeldKind::Pair, pair_tiles)),
+                    ));
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Try to split 6 tiles into two 3-tile melds (chi+chi, pon+pon, or chi+pon)
+fn try_two_melds(tiles: &[Tile]) -> Option<Play> {
+    // Try all ways to split 6 tiles into two groups of 3
+    for i in 0..6 {
+        for j in i + 1..6 {
+            for k in j + 1..6 {
+                let group_a = vec![tiles[i], tiles[j], tiles[k]];
+                if let Some(kind_a) = is_meld(&group_a) {
                     let remaining: Vec<Tile> = tiles
                         .iter()
                         .enumerate()
-                        .filter(|(idx, _)| *idx != i && *idx != j)
+                        .filter(|(idx, _)| *idx != i && *idx != j && *idx != k)
                         .map(|(_, t)| *t)
                         .collect();
-
-                    if remaining.len() == 4 && is_kan(&remaining) {
-                        return Ok(Play::new(
-                            vec![Meld::new(MeldKind::Kan, remaining)],
-                            Some(Meld::new(MeldKind::Pair, pair_tiles)),
-                        ));
+                    if remaining.len() == 3 {
+                        if let Some(kind_b) = is_meld(&remaining) {
+                            return Some(Play::new(
+                                vec![
+                                    Meld::new(kind_a, group_a),
+                                    Meld::new(kind_b, remaining),
+                                ],
+                                None,
+                            ));
+                        }
                     }
                 }
             }
         }
+    }
+    None
+}
 
-        // Also try 3-tile meld + pair, with 1 extra (shouldn't be valid for 6 tiles)
+/// Try to split 6 tiles into three pairs
+fn try_three_pairs(tiles: &[Tile]) -> Option<Play> {
+    // Find all valid pairs and try to pick 3 disjoint ones
+    let mut pairs: Vec<(usize, usize)> = Vec::new();
+    for i in 0..tiles.len() {
+        for j in i + 1..tiles.len() {
+            if tiles[i].same_type(&tiles[j]) {
+                pairs.push((i, j));
+            }
+        }
     }
 
-    Err("选中的牌无法组成合法的面子+对子组合".to_string())
+    for a in 0..pairs.len() {
+        for b in a + 1..pairs.len() {
+            for c in b + 1..pairs.len() {
+                let (a0, a1) = pairs[a];
+                let (b0, b1) = pairs[b];
+                let (c0, c1) = pairs[c];
+                let indices = [a0, a1, b0, b1, c0, c1];
+                if indices.iter().collect::<std::collections::HashSet<_>>().len() == 6 {
+                    return Some(Play::new(
+                        vec![
+                            Meld::new(MeldKind::Pair, vec![tiles[a0], tiles[a1]]),
+                            Meld::new(MeldKind::Pair, vec![tiles[b0], tiles[b1]]),
+                            Meld::new(MeldKind::Pair, vec![tiles[c0], tiles[c1]]),
+                        ],
+                        None,
+                    ));
+                }
+            }
+        }
+    }
+    None
 }
 
 fn validate_full_hand(tiles: &[Tile]) -> Result<Play, String> {

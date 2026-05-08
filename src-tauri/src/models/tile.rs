@@ -54,15 +54,8 @@ impl Tile {
     /// Intrinsic Fu value for scoring
     pub fn base_fu(&self) -> u64 {
         match self.suit {
-            TileSuit::Manzu | TileSuit::Pinzu | TileSuit::Souzu => {
-                if self.rank == 1 || self.rank == 9 {
-                    6 // Terminal tiles
-                } else {
-                    3 // Simple tiles (2-8)
-                }
-            }
-            TileSuit::Wind => 8,
-            TileSuit::Dragon => 10,
+            TileSuit::Manzu | TileSuit::Pinzu | TileSuit::Souzu => self.rank as u64,
+            TileSuit::Wind | TileSuit::Dragon => 10,
         }
     }
 
