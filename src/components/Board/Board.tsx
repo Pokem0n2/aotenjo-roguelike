@@ -29,6 +29,7 @@ export function Board() {
     isLoading,
     lastPlayResult,
     error,
+    skipCount,
   } = useGameStore();
 
   const setSelectedTileIds = useGameStore((s) => s.setSelectedTileIds);
@@ -188,9 +189,9 @@ export function Board() {
         <button
           className="btn btn-secondary"
           onClick={handleSkip}
-          disabled={isLoading || roundOver}
+          disabled={isLoading || roundOver || skipCount >= 9}
         >
-          {skipReduced ? "跳过(+3牌)" : "跳过(+8牌)"}
+          {skipCount >= 9 ? "跳过(已用完)" : skipReduced ? "跳过(+3牌)" : "跳过(+8牌)"}
         </button>
         <span className="selected-count">
           已选 {selectedTileIds.length} 张

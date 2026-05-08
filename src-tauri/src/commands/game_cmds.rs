@@ -25,6 +25,7 @@ pub struct GameStateView {
     pub boss_disabled: bool,
     pub shop_items: Vec<ShopItemView>,
     pub shop_rerolls: u8,
+    pub skip_count: u8,
 }
 
 #[derive(serde::Serialize)]
@@ -241,7 +242,7 @@ pub fn end_round(state: State<'_, Mutex<GameState>>) -> Result<EndRoundView, Str
 #[tauri::command]
 pub fn skip_play(state: State<'_, Mutex<GameState>>) -> Result<GameStateView, String> {
     let mut state = state.lock().map_err(|e| e.to_string())?;
-    state.skip_play();
+    state.skip_play()?;
     Ok(GameStateView::from(&*state))
 }
 
@@ -311,6 +312,7 @@ impl From<&GameState> for GameStateView {
             boss_disabled: state.boss_disabled,
             shop_items,
             shop_rerolls: state.shop_rerolls,
+            skip_count: state.skip_count,
         }
     }
 }

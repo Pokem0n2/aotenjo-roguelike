@@ -61,6 +61,7 @@ export interface GameStateView {
   boss_disabled: boolean;
   shop_items: ShopItemView[];
   shop_rerolls: number;
+  skip_count: number;
 }
 
 export interface PlayResultView {
@@ -94,6 +95,7 @@ interface GameStore {
   bossDisabled: boolean;
   shopItems: ShopItemView[];
   shopRerolls: number;
+  skipCount: number;
   lastPlayResult: PlayResultView | null;
   isLoading: boolean;
   error: string | null;
@@ -124,6 +126,7 @@ export const useGameStore = create<GameStore>((set) => ({
   bossDisabled: false,
   shopItems: [],
   shopRerolls: 0,
+  skipCount: 0,
   lastPlayResult: null,
   isLoading: false,
   error: null,
@@ -147,6 +150,7 @@ export const useGameStore = create<GameStore>((set) => ({
       bossDisabled: view.boss_disabled,
       shopItems: view.shop_items,
       shopRerolls: view.shop_rerolls,
+      skipCount: view.skip_count,
     }),
 
   setSelectedTileIds: (ids) => set({ selectedTileIds: ids }),

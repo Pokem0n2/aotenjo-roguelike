@@ -56,6 +56,7 @@ pub struct GameState {
     pub shop_items: Vec<ShopItem>,
     pub shop_rerolls: u8,
     pub boss_disabled: bool,
+    pub skip_count: u8,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -95,6 +96,7 @@ impl GameState {
             shop_items: Vec::new(),
             shop_rerolls: 2,
             boss_disabled: false,
+            skip_count: 0,
         }
     }
 
@@ -122,8 +124,7 @@ impl GameState {
         self.round_score = 0;
         self.current_play = 0;
         self.boss_disabled = false;
-
-        // Assign boss
+        self.skip_count = 0;
         let wind_index = match self.current_wind {
             Wind::East => 0,
             Wind::South => 1,
@@ -272,7 +273,11 @@ impl GameState {
         self.current_play >= self.max_plays || self.round_score >= self.round_target
     }
 
-    pub fn skip_play(&mut self) {
+    pub fn skip_play(&mut self) -> Result<(), String> {
+        if self.skip_count >= 9 {
+            return Err("本局跳过次数已达上限(9次)".to_string());
+        }
+        self.skip_count += 1;
         self.current_play += 1;
 
         let skip_draw = if !self.boss_disabled {
@@ -302,6 +307,7 @@ impl GameState {
                 *current += 0.5;
             }
         }
+        Ok(())
     }
 
     pub fn start_next_round(&mut self) {

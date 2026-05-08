@@ -210,10 +210,11 @@ mod tests {
 
     #[test]
     fn test_base_fu() {
-        assert_eq!(Tile::new(TileSuit::Manzu, 5, 0).base_fu(), 3);
-        assert_eq!(Tile::new(TileSuit::Manzu, 1, 0).base_fu(), 6);
-        assert_eq!(Tile::new(TileSuit::Manzu, 9, 0).base_fu(), 6);
-        assert_eq!(Tile::new(TileSuit::Wind, 1, 0).base_fu(), 8);
+        assert_eq!(Tile::new(TileSuit::Manzu, 5, 0).base_fu(), 5);
+        assert_eq!(Tile::new(TileSuit::Manzu, 1, 0).base_fu(), 1);
+        assert_eq!(Tile::new(TileSuit::Manzu, 9, 0).base_fu(), 9);
+        assert_eq!(Tile::new(TileSuit::Pinzu, 3, 0).base_fu(), 3);
+        assert_eq!(Tile::new(TileSuit::Wind, 1, 0).base_fu(), 10);
         assert_eq!(Tile::new(TileSuit::Dragon, 2, 0).base_fu(), 10);
     }
 
